@@ -96,16 +96,17 @@ public class ListaProdutosActivity extends AppCompatActivity {
 
     private void abreFormularioEditaProduto(int posicao, Produto produto) {
         new EditaProdutoDialog(this, produto,
-                produtoEditado -> edita(posicao, produtoEditado))
-                .mostra();
-    }
+                produtoEditado -> repository.edita(produtoEditado, new ProdutoRepository.DadosCarregadosCallback<Produto>() {
+                    @Override
+                    public void quandoSucesso(Produto produtoEditado) {
+                        adapter.edita(posicao, produtoEditado);
+                    }
 
-    private void edita(int posicao, Produto produto) {
-        new BaseAsyncTask<>(() -> {
-            dao.atualiza(produto);
-            return produto;
-        }, produtoEditado ->
-                adapter.edita(posicao, produtoEditado))
-                .execute();
+                    @Override
+                    public void quandoFalha(String erro) {
+                        Toast.makeText(ListaProdutosActivity.this, "Nâo fooi possivel editar o produto", Toast.LENGTH_SHORT).show();
+                    }
+                }))
+                .mostra();
     }
 }
